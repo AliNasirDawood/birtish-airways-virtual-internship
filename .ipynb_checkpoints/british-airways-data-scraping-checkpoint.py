@@ -1,34 +1,39 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium import webdriver
 from htmlparsedata import html_parse_data
 
+def get_total_pages(driver, url):
+    """
+    Navigate to the website with pagination and retrieve the total number of pages.
+    """
+    driver.get(url)
+    total_pages_element = driver.find_element(By.XPATH, '//*[@id="main"]/section[3]/div[1]/div/article/ul')
+    total_pages_text = total_pages_element.text
+    return int(total_pages_text.split()[-2])  # Assuming the last word is the total number of pages
 
+def scrape_reviews_for_all_pages(driver, base_url, total_pages):
+    """
+    Scrape reviews for all pages and call the html_parse_data function.
+    """
+    for page_num in range(1, total_pages + 1):
+        page_url = f"{base_url}/page/{page_num}/?sortby=post_date%3ADesc&pagesize=500"
+        driver.get(page_url)
+        print(f'Page Number = {page_num}')
+        print(f'Page URL = {page_url}')
+        print(f"The length of the page = {len(page_url)}")
+        print(f"The Type of the page = {type(page_url)}")
+        html_parse_data(page_url)
 
-driver = webdriver.Chrome()
+def main():
+    # Start a Chrome WebDriver
+    driver = webdriver.Chrome()
 
-# Navigate to the website with pagination
-driver.get('https://www.airlinequality.com/airline-reviews/british-airways/')
+    base_url = 'https://www.airlinequality.com/airline-reviews/british-airways/'
+    total_pages = get_total_pages(driver, base_url)
+    scrape_reviews_for_all_pages(driver, base_url, total_pages)
 
-# Locate the element that displays the total number of pages
-# Update the XPath expression to match the actual element on the website
-total_pages_element = driver.find_element(By.XPATH, '//*[@id="main"]/section[3]/div[1]/div/article/ul')
+    # Close the browser
+    driver.quit()
 
-# Extract the text of the total pages element
-total_pages_text = total_pages_element.text
-
-# Process the extracted text to get the total number of pages
-# You may need to parse the text and extract the numeric value
-total_pages = int(total_pages_text.split()[-2])  # Assuming the last word is the total number of pages
-for page_num in range (total_pages):
-    page_url = 'https://www.airlinequality.com/airline-reviews/british-airways/page/' + str(page_num) + "/?sortby=post_date%3ADesc&pagesize=500"
-    driver.get(page_url)
-    print('Page Number  = ' ,page_num)
-    print(page_url)
-    print("The length of the page", len(page_url))
-    print("The Type of the page ",type(page_url))
-    html_parse_data(page_url)
-# Close the browser
-driver.quit()
+if __name__ == "__main__":
+    main()
