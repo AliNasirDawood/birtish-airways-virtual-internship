@@ -3,11 +3,13 @@ from bs4 import BeautifulSoup
 from text_strip import text_strip_html_text
 
 
+
 def html_parse_data(url):
 
     response = requests.get(url)
     html_content = response.text
     soup = BeautifulSoup(html_content, 'html.parser')
+ 
 
     # # Extracting the information
     header = soup.find_all('h2', class_='text_header')
@@ -22,6 +24,8 @@ def html_parse_data(url):
     recommended = soup.find_all('td', class_='review-rating-header recommended')
     tr_rating_elements = soup.find_all('tr')
     # Printing the extracted information
+   
+
     text_strip_html_text(header,author,country,date_published,review_body,type_of_traveller,seat_type,route,date_flown,recommended,tr_rating_elements)
      
 
