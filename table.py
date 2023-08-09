@@ -1,20 +1,25 @@
 import pandas as pd
+from transformers import GPT2LMHeadModel, GPT2Tokenizer
+import torch
+# Load and preprocess CSV data
+data = pd.read_csv("data.csv")
+reviews = data["Review"].tolist()
 
-# Given list of tuples
-data = [('Food & Beverages', 3), ('Inflight Entertainment', 3), ('Seat Comfort', 3), ('Staff Service', 3), ('Value for Money', 3), ('Seat Comfort', 1), ('Cabin Staff Service', 1), ('Ground Service', 1), ('Value For Money', 1), ('Seat Comfort', 1), ('Cabin Staff Service', 1), ('Food & Beverages', 1), ('Inflight Entertainment', 1), ('Ground Service', 2), ('Wifi & Connectivity', 1), ('Value For Money', 1), ('Seat Comfort', 3), ('Cabin Staff Service', 3)]
-# # Convert list of tuples to DataFrame
-# df = pd.DataFrame(data, columns=['Category', 'Rating'])
+# Train a GPT-2 model (this is a simplified example)
+model_name = "gpt2"
+model = GPT2LMHeadModel.from_pretrained(model_name)
+tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 
-# # Print the DataFrame
-# print(df)
-import pandas as pd
+# Chatbot interaction
+user_input = input("You: ")
+chat_history = user_input
 
-# Assuming your initial DataFrame is named 'df'
-df = pd.DataFrame(data, columns=['Category', 'Rating'])
-
-# Pivot the DataFrame
-df_pivot = df.pivot_table(index=df.index // 2, columns='Category', values='Rating', aggfunc='first')
-
-# Print the reshaped DataFrame
-print(df_pivot)
-
+while True:
+    input_ids = tokenizer.encode(chat_history, return_tensors="pt")
+    with torch.no_grad():
+        output = model.generate(input_ids, max_length=100, num_return_sequences=1)
+    response = tokenizer.decode(output[0], skip_special_tokens=True)
+    
+    print("Chatbot:", response)
+    user_input = input("You: ")
+    chat_history += "\n" + user_input
